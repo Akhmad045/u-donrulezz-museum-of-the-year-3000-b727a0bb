@@ -46,7 +46,14 @@ def check(text: str) -> list[str]:
 
 
 def write_entry(text: str, where: Path = ENTRY_PATH) -> Path:
-    """Write the label to the entry file, creating its folder as needed."""
+    """Write the label to the entry file, creating its folder as needed.
+
+    Refuses a label that fails the gate instead of writing it, so no
+    caller can put an invalid entry on disk by accident.
+    """
+    faults = check(text)
+    if faults:
+        raise ValueError("entry fails the gate: " + "; ".join(faults))
     where.parent.mkdir(parents=True, exist_ok=True)
     where.write_text(text, encoding="utf-8")
     return where
